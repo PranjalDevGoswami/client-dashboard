@@ -259,7 +259,42 @@ with tabs[3]:
 # Brand Performance tab
 with tabs[4]:
     st.header("Brand Performance")
-    brands_counts= data1['First Audio device Brand on Mind'].value_counts(dropna=False)
+    brands_counts = data1['First Audio device Brand on Mind'].value_counts(dropna=False)
+
+    # Map positive values
     positive_mapping = data1['Affordable Price'].value_counts(dropna=False)
 
+    # Create the Bar Chart
+    fig, ax = plt.subplots(figsize=(14, 8))  # Increase the figure size
+    bar_width = 0.35
 
+    # Plot positive and negative reviews separately
+    positive_counts = data1[data1['Affordable Price'] == 1]['First Audio device Brand on Mind'].value_counts()
+    negative_counts = data1[data1['Affordable Price'] == 0]['First Audio device Brand on Mind'].value_counts()
+
+    # Align the indices of both counts to avoid mismatches
+    all_brands = data1['First Audio device Brand on Mind'].unique()
+    positive_counts = positive_counts.reindex(all_brands, fill_value=0)
+    negative_counts = negative_counts.reindex(all_brands, fill_value=0)
+
+    # Sort the brands by total reviews for better arrangement
+    total_counts = positive_counts + negative_counts
+    sorted_brands = total_counts.sort_values(ascending=False).index
+
+    positive_counts = positive_counts.reindex(sorted_brands)
+    negative_counts = negative_counts.reindex(sorted_brands)
+
+    index = range(len(sorted_brands))
+
+    bar1 = ax.bar(index, positive_counts, bar_width, label='Positive Reviews')
+    bar2 = ax.bar(index, negative_counts, bar_width, bottom=positive_counts, label='Negative Reviews')
+
+    ax.set_xlabel('Brand')
+    ax.set_ylabel('Number of Reviews')
+    ax.set_title('Brand Performance Based on Reviews')
+    ax.set_xticks(index)
+    ax.set_xticklabels(sorted_brands, rotation=45, ha='right')  # Rotate labels and align right
+    ax.legend()
+
+    # Display the Bar Chart in Streamlit
+    st.pyplot(fig)
